@@ -1,0 +1,15 @@
+# .gitignore
+
+# output files
+*.ssexctn
+*.ss
+
+# manuals
+*.pdf
+
+# temp files
+*~
+*.bak
+
+# .mat files & others
+*.mat

@@ -1,0 +1,7 @@
+% Mass prorieties
+[0 0 -13.46] 		    % Platform CoG
+1.3473e7   		    % Platform mass (kg)
+6.788e9                    % Platform inertia for roll tilt rotation about the platform CM (kg m^2)
+6.788e9                    % Platform inertia for pitch tilt rotation about the platform CM (kg m^2)
+1.190e10                   % Platfrom inertia for yaw rotation about the platform CM (kg m^2)
+1.3883e+04                  % Displaced volume of water when the platform is in its undisplaced position (m^3) [USE THE SAME VALUE COMPUTED BY WAMIT AS OUTPUT IN THE .OUT FILE!]

@@ -1,0 +1,7 @@
+SS_Fitting Change Log:
+
+V1.00.00 22-Mar-2013
+  First release;
+
+v1.00.01 16-Jul-2013
+  - Increased the robustness of the code, by checking the user inputs before running the code;
