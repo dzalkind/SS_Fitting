@@ -13,3 +13,6 @@
 
 # .mat files & others
 *.mat
+
+# vscode stuff
+*.vscode
