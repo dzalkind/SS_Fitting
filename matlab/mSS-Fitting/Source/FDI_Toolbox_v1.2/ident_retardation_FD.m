@@ -64,6 +64,9 @@ LogScale   = PlotOpt(2);
 wsFactor   = PlotOpt(3);
 wminFactor = PlotOpt(4);
 wmaxFactor = PlotOpt(5);
+
+PlotFlag    = 0;
+LogScale    = 0;
  
 %Prepare the data for identification
 Scale=max(abs(Kw));
