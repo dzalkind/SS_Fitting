@@ -30,16 +30,47 @@ class SSFit_Radiation(object):
     def readInputs(self):
 
         with open(self.InputFile,'r') as f:
+            try:
+                f.readline()
+                self.InputVars['HydroFile']      = f.readline().split('%')[0].strip()
+                self.InputVars['DOFs']          = np.fromstring(f.readline().split('%')[0].strip()[1:-1],dtype=int,sep = ' ')
+                self.InputVars['FreqRange']     = np.fromstring(f.readline().split('%')[0].strip()[1:-1],dtype=float,sep = ' ')
+                self.InputVars['WeightFact']    = float(f.readline().split('%')[0])
+                self.InputVars['IDMethod']      = int(f.readline().split('%')[0])
+                self.InputVars['FitReq']        = float(f.readline().split('%')[0])
+                self.InputVars['PlotFit']       = int(f.readline().split('%')[0])
+                self.InputVars['ManReduction']  = int(f.readline().split('%')[0])
+            except:
+                print('SS_Fit Input File Error: Error reading the input file.')
+                print('Please use the reference file ./test_cases/Haliade/SS_Fitting_Options.inp')
 
-            f.readline()
-            self.InputVars['HydroFile']      = f.readline().split('%')[0].strip()
-            self.InputVars['DOFs']          = np.fromstring(f.readline().split('%')[0].strip()[1:-1],dtype=int,sep = ' ')
-            self.InputVars['FreqRange']     = np.fromstring(f.readline().split('%')[0].strip()[1:-1],dtype=float,sep = ' ')
-            self.InputVars['WeightFact']    = float(f.readline().split('%')[0])
-            self.InputVars['IDMethod']      = int(f.readline().split('%')[0])
-            self.InputVars['FitReq']        = float(f.readline().split('%')[0])
-            self.InputVars['PlotFit']       = int(f.readline().split('%')[0])
-            self.InputVars['ManReduction']  = int(f.readline().split('%')[0])
+
+        # Input file error checking
+        # FreqRange
+        FreqRange = self.InputVars['FreqRange']
+
+        if len(FreqRange) != 2:
+            print('SS_Fit Input File Error: Error with FreqRange in input file, must contain 2 frequencies')
+
+        if FreqRange[0] < 0:
+            print('SS_Fit Input File Error: Minimum frequency in FreqRange must be >= 0')
+
+        if FreqRange[1] < FreqRange[0]:
+            print('SS_Fit Input File Error: FreqRange must be increasing')
+
+        # Weighting Factors
+        WeightFact = self.InputVars['WeightFact']
+
+        if WeightFact < 0 or WeightFact > 1:
+            print('SS_Fit Input File Error: WeightFact must be between 0 and 1')
+
+        # Fit
+        FitReq = self.InputVars['FitReq']
+
+        if FitReq < 0 or FitReq > 1:
+            print('SS_Fit Input File Error: FitReq must be between 0 and 1')
+
+        
 
     def setWeights(self,omega):
         
@@ -80,7 +111,6 @@ class SSFit_Radiation(object):
 
         # Remove first row because of initialization 
         AA = AA[1:]
-        print('here')
 
         # Input BB and output CC matrix, first initialize: 6 inputs and outputs
         BB = np.zeros([1,6])
@@ -134,8 +164,7 @@ class SSFit_Radiation(object):
             np.savetxt(f,BB,fmt='%.6e')
             np.savetxt(f,CC,fmt='%.6e')
 
-
-        print('here')
+        print('Fit a SS model with {} states'.format(sum(states)))
 
 
 class WAMIT_Out(object):
@@ -411,7 +440,7 @@ class FDI_Fitting(object):
 
         for iter in range(0,20):
             b,a = invfreqs(F_resp, om, ord_num, ord_den, wf=Weight)
-            # a   = makeStable(a)    # DZ: I think this is potentially problematic, can lead to divergent solutions
+            a   = makeStable(a)    # DZ: I think this is potentially problematic, can lead to divergent solutions
             
             Weight = 1/abs(np.polyval(a,1j*om))**2
 
@@ -449,7 +478,7 @@ class FDI_Fitting(object):
         for q, P in enumerate(self.sys):
 
             normalIdx = np.array(self.sysDOF[q]) + 1
-            sub = str(normalIdx[0]) + str(normalIdx[1])
+            sub = str(normalIdx[1]) + str(normalIdx[0])
 
             plt.figure()
             plt.plot(wamData.omega,np.real(wamData.K[self.sysDOF[q][0],self.sysDOF[q][1],:]),'o',label='K_'+sub)
@@ -457,13 +486,13 @@ class FDI_Fitting(object):
 
             plt.title(idDOF(self.sysDOF[q][0])+'->'+idDOF(self.sysDOF[q][1])+ ' Transfer Function')
             
-
+            plt.grid(b=True)
             # plt.rc('text', usetex=True)
             plt.legend()
 
         plt.show()
 
-        print('here')
+        # print('here')
 
 
 def computeError(K,K_hat,om,A_inf):
@@ -512,7 +541,7 @@ if __name__=='__main__':
 
     ss_fitRad = SSFit_Radiation()
 
-    ss_fitRad.InputFile = '/Users/dzalkind/Tools/SS_Fitting/test_cases/Haliade/SS_Fitting_Options.inp'
+    ss_fitRad.InputFile = '/Users/dzalkind/Tools/SS_Fitting/test_cases/UMaine_Semi/SS_Fitting_Options.inp'
 
     # read SS_Fitting inputs
     ss_fitRad.readInputs()
@@ -524,5 +553,15 @@ if __name__=='__main__':
     # set weights
     ss_fitRad.setWeights(wam.omega)
 
+    print(idDOF(5))
+
+    # FDI Fitting
+    fdi = FDI_Fitting()
+    fdi.fit(ss_fitRad,wam)
+
+    # Visualize Fit
+    fdi.visualizeFits(wam)
+
+    ss_fitRad.outputMats(fdi)
     print('here')
     

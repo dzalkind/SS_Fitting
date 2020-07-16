@@ -118,7 +118,7 @@ if FDIopt.AinfFlag==1,
     %      r2Thres = 0.97;
     while  (R2B<r2Thres) & (R2A<r2Thres),
         FDIopt.Ord = FDIopt.Ord +1;
-        if FDIopt.Ord > FDIopt.OrdMax,
+        if FDIopt.Ord >= FDIopt.OrdMax,
             break
         end
         [KsNum,KsDen]=ident_retardation_FD(W,Kw,FDIopt.Ord,MethOpt,PlotOpt);

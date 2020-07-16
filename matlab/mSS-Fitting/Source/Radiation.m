@@ -28,12 +28,12 @@ end
 
 kmax=length(A(:,1))/(ldof+1);%number of frequency
 AM(kmax,ii,ii)=0; %Initialize matrix
-AMinf=AM; %Initialize infinite Added Mass
+AMinf=zeros(6,6); %Initialize infinite Added Mass
 D=AM;%Initialize matrix
 K=AM;%Initialize matrix
 Dd=AM;%Initialize matrix
 AMd=AM;%Initialize matrix
-AMinfd=AM;%Initialize matrix
+AMinfd=zeros(6,6);%Initialize matrix
 w=zeros(1,kmax);%Initialize matrix
 
 for l=1:1:ii
@@ -93,11 +93,28 @@ for s=1:1:ii
         end
     end
 end
-I=find(wi>=Rad.twr(1) & wi<=Rad.twr(2)); %most relevant freq. range
-wwac=1-Rad.wwf;                          %freq. weights in the a&c intervals (marginal ranges)
-wwb=(kmax/length(I)-1)*Rad.wwf+1;        %freq. weights in the b interval (most relevant range)
-wiw=[wwac*ones(1,I(1)-1), wwb*ones(1,length(I)),...
-     wwac*ones(1,length(wi)-length(I)-I(1)+1)];
+
+
+% I=wi>=Rad.twr(1) & wi<=Rad.twr(2); %most relevant freq. range
+% wwac=1-Rad.wwf;                          %freq. weights in the a&c intervals (marginal ranges)
+% wwb=(kmax/length(I)-1)*Rad.wwf+1;        %freq. weights in the b interval (most relevant range), DZ: I think they were trying to make it so that the weights sum to 1...not sure that's necessary
+% wiw=[wwac*ones(1,I(1)-1), wwb*ones(1,length(I)),...
+%      wwac*ones(1,length(wi)-length(I)-I(1)+1)];
+ 
+% DZ: rewriting because the above looks off
+I=wi>=Rad.twr(1) & wi<=Rad.twr(2);
+wiw     = zeros(length(wi));
+
+wiw(~I) = 1 - Rad.wwf;
+wiw(I)  = Rad.wwf;
+wiw = wiw/sum(wiw);
+ 
+% check things for port
+if 1 
+    figure(900);
+    plot(w,AMd(:,4,4));
+end
+ 
 
 switch Rad.tfi % Fitting method to use
        case 1, [ssRad] = FreqID(Rad,Ks,HM,wi,wiw,dof,ii); %Freq. Identification
@@ -207,7 +224,7 @@ function [ssRad]=FDI(Rad,Ks,AM,AMinf,D,wi,w,dof,ii)
     addpath('FDI_Toolbox_v1.2'); %Add the FDI folder
     
     %Input option structure
-    FDIopt.OrdMax=20; % - Maximum order of transfer function to be considered. Typical value 20.
+    FDIopt.OrdMax=7; % - Maximum order of transfer function to be considered. Typical value 20.
     FDIopt.AinfFlag=1;% - if set to 1, the algorithm uses Ainf (3D hydrodynamic data), %if set to 0, the algorithm estimates Ainf (2D hydrodynamic data);
     FDIopt.Method=2; % - There are 3 parameter estimation methods (1,2,3). See help of fit_siso_fresp. Recomended method 2 (best trade off between accuracy and speed)
     FDIopt.Iterations=20;% - Related to parameter estimation methods 2 and 3. See help of fit_siso_fresp. Typical value 20.
