@@ -370,6 +370,17 @@ FirstPass = '.True.';
    Kc1 = KcDir;
 
    w = HdroFreq(1:length(HdroFreq)-1); 
+   
+   %%
+   if 0
+       iDoF = 5;
+       figure(8000);
+       subplot(211);
+       semilogx(w,abs(Kc1(:,:,iDoF)));
+       
+       subplot(212);
+       semilogx(w,angle(Kc1(:,:,iDoF)));
+   end
 
 
 %% Call the CausalIRF function to form a causal IRF from the original IRF through application of
@@ -436,7 +447,7 @@ ExcitationStatesperDOF=[ ];
 ExcitationStatesperDOF=[length(ssExcite(1).A),length(ssExcite(2).A),length(ssExcite(3).A),length(ssExcite(4).A),length(ssExcite(5).A),length(ssExcite(6).A)];
 
 
-fid=fopen(strcat(Excite.OutFileName, '.ssexctn'),'w+');
+fid=fopen(strcat(Excite.FileName, '.ssexctn'),'w+');
 
 fprintf(fid,'%s\r\n',['SS_Excitation_Fitting v1.00.01: State-Spaces Matrices']);
 fprintf(fid,'%s\r\n',[num2str(WaveHeadingAngle) '    %Wave heading angle']);

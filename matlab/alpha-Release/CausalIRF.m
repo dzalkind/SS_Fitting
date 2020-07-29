@@ -44,6 +44,11 @@ Kc2= interp1(w,Kc,wi,'previous','extrap');
 KcConj = conj(flip(Kc2));   
 Kc2sided = [Kc2; KcConj(1:length(KcConj)-1,1,:)];
 
+if 1
+    figure(800);
+    plot(real(Kc2sided(:,:,1)))
+end
+
 % re-form frequency vector based on length of modified FRF and already
 % calculated dw.
 wi2 = [0:1:length(Kc2sided)-1]*dw; 
@@ -51,6 +56,11 @@ np2 = length(wi2);
 
 % Now calculate the inverse Fourier Transform using Matlab's ifft command:
 Kt2sided = ifft(Kc2sided)/dT;
+
+if 1
+    figure(801);
+    plot(Kt2sided(:,:,1));
+end
 
 % resulting 2-sided IRF is not centered. Center this IRF through Matlab's ifftshift command.
 % Add more explanation here
@@ -116,12 +126,30 @@ xlabel('Time (sec)','FontSize',12)
 %ylabel('Thust(kN)','FontSize',12)
 title('IRF(6)')
 
+%% Automatically find tc
+% where Kt < .05 * max(Kt)
+
+frac = .5e-1;  
+thresh = frac * max(abs(Kt2b(:)));
+
+t_all = -Excite.WaveTMax/2:dT:Excite.WaveTMax/2;
+
+firstInd = [];
+
+for iDOF = 1:6
+    firstInd_k = find(abs(Kt2(:,iDOF)) > thresh,1,'first');
+    firstInd = [firstInd;firstInd_k];
+end
+
+tc_auto = t_all(min(firstInd)-1);
+
 %% Now we will determine a causal IRF through the time-shifting method (see Report/User's manual)
 % this is based on user's intuition and examination of the IRFs just
 % plotted. You only choose one time delay value (tc)(worst case). This value of tc is applied to
 % all IRF components. 
 prompt = 'Input a causilization time:';
-tc = input(prompt);
+% tc = input(prompt);
+tc = 12
     
 Nb = length(Kt2b);
 %Now do the shifting by time tc/dT.

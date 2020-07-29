@@ -29,7 +29,7 @@ for s=1:1:ii %for each entry of the matrix
     KtSmooth = filter(b,a,Kt);
 
     %Fitting
-    [A,B,C,D,totbnd,hsv] = imp2ss(KtSmooth(:,dof(s)),dT,1,1,.01);
+    [A,B,C,D,totbnd,hsv] = imp2ss(KtSmooth(:,dof(s)),dT,1,1);
     [y,t]=impulse(ss(A,B,C*dT,0,0),plottime);
     
     %set first element of y to zero: spurious data
